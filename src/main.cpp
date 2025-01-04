@@ -7,13 +7,19 @@ int main() {
 
   bool isValid = false;
   while(!isValid){
-
+        
       std::cout << "$ ";
       std::string input;
       std::getline(std::cin, input);
+      
+      if(input == "exit 0"){
+        isValid = true;
 
-      std::cout << input << ": command not found" << std::endl;
+      }else{
 
+        std::cout << input << ": command not found" << std::endl;
+      }
+       
 
   }
 }
