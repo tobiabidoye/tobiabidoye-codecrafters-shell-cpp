@@ -184,7 +184,11 @@ void executeExternalCommands(std::vector <std::string> &args){
 
 
 void handleCd(std::vector <std::string> &args){
-    
+    if(args.size() < 2){
+        std::cerr << "cd: missing argument" << std::endl; 
+        return;
+    } 
+
     std::string targetPath = args[1];
     if(targetPath == "~" || targetPath.find("~/") == 0){
        const char * home = std::getenv("HOME");
@@ -201,11 +205,11 @@ void handleCd(std::vector <std::string> &args){
         }
 
     }
-    fs::path newPath(args[1]); 
+    fs::path newPath(targetPath); 
     if(fs::exists(newPath) && fs::is_directory(newPath)){
         fs::current_path(newPath);
     }else{
-        std::cerr << "cd: " << args[1] << ": No such file or directory" << std::endl;            
+        std::cerr << "cd: " << targetPath << ": No such file or directory" << std::endl;            
     }
 
 }
