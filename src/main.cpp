@@ -154,7 +154,11 @@ void executeExternalCommands(std::vector <std::string> &args){
 
       if(pid == 0){
         execvp(charArgs[0], charArgs.data()); 
-        std::cerr << "execvp failed" << std::endl;
+        for(auto &elem: args){
+            std::cout << elem << " ";
+        } 
+            std::cout << "not found" << std::endl;
+            
         exit(1); 
 
       }else if(pid > 0){
