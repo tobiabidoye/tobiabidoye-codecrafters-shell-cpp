@@ -17,12 +17,11 @@ bool isBuiltIn(const std::string &command, const std::vector <std::string> &buil
 void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins);
 void executeExternalCommands(std::vector <std::string> &args);
 
-
 int main() {
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  std::vector <std::string> myvec = {"type", "echo", "exit", "pwd"};
+  std::vector <std::string> myvec = {"type", "echo", "exit", "pwd", "cd"};
   bool isValid = false;
   while(!isValid){
         
@@ -80,6 +79,16 @@ int main() {
         std::cout << currPath.string() << std::endl;
         continue; 
 
+      }
+
+      if(args[0] == "cd"){
+        fs::path newPath(args[1]);
+        if(fs::exists(newPath) && fs::is_directory(newPath)){
+            fs::current_path(newPath);
+        }else{
+            std::cerr << "cd:" << args[1] << " No such file or directory" << std::endl;            
+        }
+            continue;
       }
 
 
