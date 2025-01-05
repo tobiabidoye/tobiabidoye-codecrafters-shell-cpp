@@ -4,11 +4,105 @@
 #include <string>
 #include <filesystem>
 #include <cstdlib>
+#include <sstream>
+#include <unistd.h>
+#include <sys/wait.h>
+
 
 namespace fs = std::filesystem;
 
 
+std::string findCommandInPath(const std::string & command);
+bool isBuiltIn(const std::string &command, const std::vector <std::string> &builtins);
+void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins);
+void executeExternalCommands(std::vector <std::string> &args);
 
+
+int main() {
+  // Flush after every std::cout / std:cerr
+  std::cout << std::unitbuf;
+  std::cerr << std::unitbuf;
+  std::vector <std::string> myvec = {"type", "echo", "exit"};
+  bool isValid = false;
+  while(!isValid){
+        
+      std::cout << "$ ";
+      std::string input;
+      std::string targetEcho = "echo";
+      std::string targetType = "type";
+      bool echoTrue = true;
+      bool typeTrue = true;
+      std::getline(std::cin, input);
+          
+      for(int i = 0; i < 4; i++){
+        if(input[i] != targetEcho[i]){
+            echoTrue = false;
+        }
+        if(input[i] != targetType[i]){
+            typeTrue = false;
+        }
+      }
+      
+      std::istringstream iss(input);
+      std::vector <std::string> args; 
+      std::string token; 
+
+      while(iss >> token){
+        args.push_back(token);
+      }
+
+      if(input == "exit 0"){
+        isValid = true;
+        break;
+      }
+
+
+      if(args[0] == "echo"){
+        for(size_t i = 1; i < args.size(); i++){
+            std::cout << args[i] << std::endl;
+        }
+        continue;
+      }
+
+      if(args[0] == "type" && args.size() > 1){
+        
+        std::size_t start_index = 5; 
+        std::string substring = input.substr(start_index);
+        
+        handleTypeCommand(substring, myvec);
+        continue;
+
+      }
+
+
+   executeExternalCommands(args);   
+
+      
+       
+
+  }
+}
+
+
+bool isBuiltIn(const std::string &command, const std::vector <std::string> &builtins){
+    return std::find(builtins.begin(), builtins.end(), command) != builtins.end(); 
+}
+
+void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins){
+   if(isBuiltIn(command, builtins)){
+    std::cout << command << " is a shell builtin" << std::endl;
+   }else{
+    std::string path = findCommandInPath(command);
+
+    if(!path.empty()){
+        std::cout << command << " is " << path << std::endl;
+    }else{
+        std::cout << command << " not found" << std::endl;
+    }
+   }
+    
+
+}
 
 std::string findCommandInPath(const std::string & command){
     const char * pathEnv = std::getenv("PATH");
@@ -44,80 +138,30 @@ std::string findCommandInPath(const std::string & command){
     
     return "";
 }
-int main() {
-  // Flush after every std::cout / std:cerr
-  std::cout << std::unitbuf;
-  std::cerr << std::unitbuf;
-  std::vector <std::string> myvec = {"type", "echo", "exit"};
-  bool isValid = false;
-  while(!isValid){
+
+void executeExternalCommands(std::vector <std::string> &args){
         
-      std::cout << "$ ";
-      std::string input;
-      std::string targetEcho = "echo";
-      std::string targetType = "type";
-      bool echoTrue = true;
-      bool typeTrue = true;
-      std::getline(std::cin, input);
-          
-      for(int i = 0; i < 4; i++){
-        if(input[i] != targetEcho[i]){
-            echoTrue = false;
-        }
-        if(input[i] != targetType[i]){
-            typeTrue = false;
-        }
+      std::vector <char *> charArgs; 
+
+      for(auto &elem: args){
+        charArgs.push_back(&elem[0]); 
       }
-      
 
-      if(input == "exit 0"){
-        isValid = true;
-        break;
-      }else if(echoTrue){
-        for(int i = 5; i < input.size(); i++){
-            std::cout << input[i];
-        }
-        std::cout << std::endl;
-      }else if(typeTrue){
-        std::size_t start_index = 5; 
-        std::string substring = input.substr(start_index);
-        bool isBuiltIn = false; 
+      charArgs.push_back(nullptr);
 
-        for(auto &elem: myvec){
-            if(substring.find(elem) != std::string::npos){
-                isBuiltIn = true;
-                break;
-            }
+      pid_t pid = fork();
 
-        } 
+      if(pid == 0){
+        execvp(charArgs[0], charArgs.data()); 
+        std::cerr << "execvp failed" << std::endl;
+        exit(1); 
 
-        if(isBuiltIn){
-            std::cout << substring << " is a shell builtin" << std::endl;
-        }
-
-
-        std::string path = findCommandInPath(substring);
-        if(!isBuiltIn && !path.empty()){
-            std::cout << substring << " is " << path << std::endl; 
-
-        }else if(!isBuiltIn && path.empty()){
-            
-            std::cout << substring << " not found" << std::endl;
-
-        }
-           
-
-
+      }else if(pid > 0){
+        int status;
+        waitpid(pid, &status, 0); //wait for child process to finish
+        
       }else{
-
-        std::cout << input << ": command not found" << std::endl;
+        std::cerr << "fork failed" << std::endl;
       }
 
-
-      
-
-      
-       
-
-  }
 }
