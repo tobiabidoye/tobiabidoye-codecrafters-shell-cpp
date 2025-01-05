@@ -59,8 +59,9 @@ int main() {
 
       if(args[0] == "echo"){
         for(size_t i = 1; i < args.size(); i++){
-            std::cout << args[i] << std::endl;
+            std::cout << args[i] << " ";
         }
+        std::cout << std::endl;
         continue;
       }
 
