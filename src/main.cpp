@@ -16,7 +16,7 @@ std::string findCommandInPath(const std::string & command);
 bool isBuiltIn(const std::string &command, const std::vector <std::string> &builtins);
 void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins);
 void executeExternalCommands(std::vector <std::string> &args);
-
+void handleCd(std::vector <std::string>& myvec);
 int main() {
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
@@ -82,13 +82,8 @@ int main() {
       }
 
       if(args[0] == "cd"){
-        fs::path newPath(args[1]); 
-        if(fs::exists(newPath) && fs::is_directory(newPath)){
-            fs::current_path(newPath);
-        }else{
-            std::cerr << "cd: " << args[1] << ": No such file or directory" << std::endl;            
-        }
-            continue;
+        handleCd(args);
+        continue;
       }
 
 
@@ -184,5 +179,33 @@ void executeExternalCommands(std::vector <std::string> &args){
       }else{
         std::cerr << "fork failed" << std::endl;
       }
+
+}
+
+
+void handleCd(std::vector <std::string> &args){
+    
+    std::string targetPath = args[1];
+    if(targetPath == "~" || targetPath.find("~/") == 0){
+       const char * home = std::getenv("HOME");
+        if(home){
+            if(targetPath == "~"){
+                targetPath = std::string(home); 
+            }else{
+                targetPath = std::string(home) + targetPath.substr(1);
+            }
+
+        }else{
+            std::cerr << "cd: HOME environment variable not set" <<std::endl; 
+            return;
+        }
+
+    }
+    fs::path newPath(args[1]); 
+    if(fs::exists(newPath) && fs::is_directory(newPath)){
+        fs::current_path(newPath);
+    }else{
+        std::cerr << "cd: " << args[1] << ": No such file or directory" << std::endl;            
+    }
 
 }
