@@ -82,11 +82,11 @@ int main() {
       }
 
       if(args[0] == "cd"){
-        fs::path newPath(args[1]);
+        fs::path newPath(args[1]); 
         if(fs::exists(newPath) && fs::is_directory(newPath)){
             fs::current_path(newPath);
         }else{
-            std::cerr << "cd:" << args[1] << " No such file or directory" << std::endl;            
+            std::cerr << "cd: " << args[1] << ": No such file or directory" << std::endl;            
         }
             continue;
       }
