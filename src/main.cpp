@@ -75,7 +75,7 @@ int main() {
 
       }
 
-      if(args[0] == "pwd" && args.size() > 1){
+      if(args[0] == "pwd"){
         fs::path currPath = fs::current_path();
         std::cout << currPath << std::endl;
         continue; 
