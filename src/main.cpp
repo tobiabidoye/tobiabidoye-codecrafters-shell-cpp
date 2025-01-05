@@ -22,7 +22,7 @@ int main() {
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  std::vector <std::string> myvec = {"type", "echo", "exit"};
+  std::vector <std::string> myvec = {"type", "echo", "exit", "pwd"};
   bool isValid = false;
   while(!isValid){
         
