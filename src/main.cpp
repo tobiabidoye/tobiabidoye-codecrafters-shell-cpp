@@ -7,7 +7,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/wait.h>
-
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
