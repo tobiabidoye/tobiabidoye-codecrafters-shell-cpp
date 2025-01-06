@@ -121,7 +121,6 @@ int main() {
     
       if(args[0] == "cat"){
         handleCat(args);
-        std::cout << "$ " << std::endl;
         continue; 
 
 
@@ -267,7 +266,7 @@ void handleCat(std::vector <std::string> &args){
         }
 
     }
-    std::cout << output.str() << std::endl;
-    std::cout.flush();
+    std::cout << output.str() << "$ " << std::endl;
     std::cout << std::endl;
+
 }
