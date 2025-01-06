@@ -141,7 +141,14 @@ bool isBuiltIn(const std::string &command, const std::vector <std::string> &buil
 
 void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins){
    if(isBuiltIn(command, builtins)){
-    std::cout << command << " is a shell builtin" << std::endl;
+       if(command == "cat"){
+           fs::path currPath = fs::current_path()/"cat";
+           std::cout << command << " is " << currPath << std::endl;
+
+       }else{
+
+        std::cout << command << " is a shell builtin" << std::endl;
+       }
    }else{
     std::string path = findCommandInPath(command);
 
