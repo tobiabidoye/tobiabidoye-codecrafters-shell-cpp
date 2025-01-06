@@ -121,6 +121,7 @@ int main() {
     
       if(args[0] == "cat"){
         handleCat(args);
+        std::cout << "$ " << std::endl;
         continue; 
 
 
