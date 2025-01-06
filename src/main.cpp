@@ -264,5 +264,5 @@ void handleCat(std::vector <std::string> &args){
         }
 
     }
-    std::cout << output.str() << std::endl;
+    std::cout << output.str() << "\n";
 }
