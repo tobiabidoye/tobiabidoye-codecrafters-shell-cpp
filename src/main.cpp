@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <ios>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -8,6 +9,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <algorithm>
+#include <fstream> 
+#include <cctype>
 
 namespace fs = std::filesystem;
 
@@ -17,22 +20,24 @@ bool isBuiltIn(const std::string &command, const std::vector <std::string> &buil
 void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins);
 void executeExternalCommands(std::vector <std::string> &args);
 void handleCd(std::vector <std::string>& myvec);
+void handleCat(std::vector <std::string> &args);
 int main() {
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  std::vector <std::string> myvec = {"type", "echo", "exit", "pwd", "cd"};
+  std::vector <std::string> myvec = {"type", "echo", "exit", "pwd", "cd", "cat"};
   bool isValid = false;
   while(!isValid){
         
       std::cout << "$ ";
       std::string input;
-      std::string targetEcho = "echo";
-      std::string targetType = "type";
-      bool echoTrue = true;
-      bool typeTrue = true;
+      
+      //std::string targetEcho = "echo";
+      //std::string targetType = "type";
+      //bool echoTrue = true;
+      //bool typeTrue = true;
       std::getline(std::cin, input);
-          
+       /*   
       for(int i = 0; i < 4; i++){
         if(input[i] != targetEcho[i]){
             echoTrue = false;
@@ -40,15 +45,43 @@ int main() {
         if(input[i] != targetType[i]){
             typeTrue = false;
         }
-      }
+      }*/
       
       std::istringstream iss(input);
       std::vector <std::string> args; 
-      std::string token; 
+      std::string currentArg; 
 
-      while(iss >> token){
-        args.push_back(token);
+      bool inSingleQuote = false; 
+
+      for(size_t i = 0; i < input.size(); i++){
+        char c = input[i];
+
+        if(c == '\''){
+            //if quote is found we make it true
+           inSingleQuote = !inSingleQuote; 
+        }else if(std::isspace(c) && !inSingleQuote){
+            //if space is encountered and quote is not found we append the argument to the array
+            if(!currentArg.empty()){
+                args.push_back(currentArg);
+                currentArg.clear();
+            }
+
+        }else{
+            //argument takes in 
+            currentArg += c;
+
+        }
+
       }
+
+      if(!currentArg.empty()){
+        args.push_back(currentArg);
+      }
+     
+      if(args.empty()){
+        continue;
+      }
+
 
       if(input == "exit 0"){
         isValid = true;
@@ -67,9 +100,7 @@ int main() {
       if(args[0] == "type" && args.size() > 1){
         
         std::size_t start_index = 5; 
-        std::string substring = input.substr(start_index);
-        
-        handleTypeCommand(substring, myvec);
+        handleTypeCommand(args[1], myvec);
         continue;
 
       }
@@ -85,7 +116,13 @@ int main() {
         handleCd(args);
         continue;
       }
+    
+      if(args[0] == "cat"){
+        handleCat(args);
+        continue; 
 
+
+      }
 
    executeExternalCommands(args);   
 
@@ -210,6 +247,21 @@ void handleCd(std::vector <std::string> &args){
         fs::current_path(newPath);
     }else{
         std::cerr << "cd: " << targetPath << ": No such file or directory" << std::endl;            
+    }
+
+}
+
+
+void handleCat(std::vector <std::string> &args){
+    for(size_t i = 1; i < args.size(); i++){
+        std::ifstream myfile(args[i]);
+
+        if(myfile.is_open()){
+            std::cout << myfile.rdbuf() << std::endl;
+        }else{
+            std::cerr << "cat: " << args[i] << ": No such File or directory" << std::endl;
+        }
+
     }
 
 }
