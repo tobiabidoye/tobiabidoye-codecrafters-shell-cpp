@@ -46,7 +46,9 @@ int main() {
             typeTrue = false;
         }
       }*/
-      
+      if(input.empty()){
+        continue;
+      } 
       std::istringstream iss(input);
       std::vector <std::string> args; 
       std::string currentArg; 
@@ -266,4 +268,5 @@ void handleCat(std::vector <std::string> &args){
     }
     std::cout << output.str() << std::endl;
     std::cout.flush();
+    std::cout << std::endl;
 }
