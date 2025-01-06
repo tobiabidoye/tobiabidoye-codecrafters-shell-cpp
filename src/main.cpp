@@ -259,7 +259,7 @@ void handleCat(std::vector <std::string> &args){
     for(size_t i = 1; i < args.size(); i++){
         std::ifstream myfile(args[i]);
         if(myfile.is_open()){
-            std::cout << myfile.rdbuf() << " ";
+            std::cout << myfile.rdbuf();
         }else{
             std::cerr << "cat: " << args[i] << ": No such File or directory" << std::endl;
             return;
