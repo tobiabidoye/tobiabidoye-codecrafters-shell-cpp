@@ -14,7 +14,7 @@
 
 namespace fs = std::filesystem;
 
-
+std::vector<std::string> parseInput(const std::string & input);
 std::string findCommandInPath(const std::string & command);
 bool isBuiltIn(const std::string &command, const std::vector <std::string> &builtins);
 void handleTypeCommand(const std::string &command, const std::vector <std::string> &builtins);
@@ -48,54 +48,9 @@ int main() {
       }*/
       if(input.empty()){
         continue;
-      } 
-      std::istringstream iss(input);
-      std::vector <std::string> args; 
-      std::string currentArg; 
-
-      bool inSingleQuote = false; 
-      bool inDoubleQuote = false;
-      for(size_t i = 0; i < input.size(); ++i){
-        char c = input[i];
-
-        if(c == '\'' && !inDoubleQuote){
-            //if quote is found we make it true
-           inSingleQuote = !inSingleQuote; 
-        }else if(c == '=' && !inSingleQuote){
-            inDoubleQuote = !inDoubleQuote; 
-            
-        }else if(c == '\\' && inDoubleQuote && i+1 < input.size()){
-            char nextChar = input[i+1]; 
-            if(nextChar == '\\' || nextChar == '$' || nextChar == '"' || nextChar == '\n'){
-                currentArg += nextChar; 
-                ++i;
-            }else{
-                currentArg += c; 
-            }
-        }else if(std::isspace(c) && !inSingleQuote &&!inDoubleQuote){
-            //if space is encountered and quote is not found we append the argument to the array
-            if(!currentArg.empty()){
-                args.push_back(currentArg);
-                currentArg.clear();
-            }
-
-        }else{
-            //argument takes in 
-            currentArg += c;
-
-        }
-
       }
 
-      if(!currentArg.empty()){
-        args.push_back(currentArg);
-      }
-        
-      if(inSingleQuote || inDoubleQuote){
-        std::cerr << "unmatched quote in input" << std::endl;
-      }
-      
-
+      std::vector <std::string> args = parseInput(input);
       if(args.empty()){
         continue;
       }
@@ -291,4 +246,57 @@ void handleCat(std::vector <std::string> &args){
 
     }
 
+}
+
+
+std::vector<std::string> parseInput(const std::string & input){
+
+
+      std::istringstream iss(input);
+      std::vector <std::string> args; 
+      std::string currentArg; 
+
+      bool inSingleQuote = false; 
+      bool inDoubleQuote = false;
+      for(size_t i = 0; i < input.size(); ++i){
+        char c = input[i];
+
+        if(c == '\'' && !inDoubleQuote){
+            //if quote is found we make it true
+           inSingleQuote = !inSingleQuote; 
+        }else if(c == '"' && !inSingleQuote){
+            inDoubleQuote = !inDoubleQuote; 
+            
+        }else if(c == '\\' && inDoubleQuote && i+1 < input.size()){
+            char nextChar = input[i+1]; 
+            if(nextChar == '\\' || nextChar == '$' || nextChar == '"' || nextChar == '\n'){
+                currentArg += nextChar; 
+                ++i;
+            }else{
+                currentArg += c; 
+            }
+        }else if(std::isspace(c) && !inSingleQuote &&!inDoubleQuote){
+            //if space is encountered and quote is not found we append the argument to the array
+            if(!currentArg.empty()){
+                args.push_back(currentArg);
+                currentArg.clear();
+            }
+
+        }else{
+            //argument takes in 
+            currentArg += c;
+
+        }
+
+      }
+
+      if(!currentArg.empty()){
+        args.push_back(currentArg);
+      }
+        
+      if(inSingleQuote || inDoubleQuote){
+        std::cerr << "unmatched quote in input" << std::endl;
+      }
+      
+    return args;
 }
