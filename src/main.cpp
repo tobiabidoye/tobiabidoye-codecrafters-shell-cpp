@@ -267,13 +267,20 @@ std::vector<std::string> parseInput(const std::string & input){
         }else if(c == '"' && !inSingleQuote){
             inDoubleQuote = !inDoubleQuote; 
             
-        }else if(c == '\\' && inDoubleQuote && i+1 < input.size()){
-            char nextChar = input[i+1]; 
-            if(nextChar == '\\' || nextChar == '$' || nextChar == '"' || nextChar == '\n'){
-                currentArg += nextChar; 
-                ++i;
+        }else if(c == '\\'){
+            if(i + 1 < input.size()){
+                char nextChar = input[i+1]; 
+                if(inDoubleQuote && (nextChar == '\\' || nextChar == '$' || nextChar == '"')){
+                    currentArg += nextChar;
+                    ++i;
+                }else if(!inSingleQuote){
+                    currentArg += nextChar; 
+                    ++i;
+                }else{
+                    currentArg += c;
+                }
             }else{
-                currentArg += c; 
+                currentArg += c;
             }
         }else if(std::isspace(c) && !inSingleQuote &&!inDoubleQuote){
             //if space is encountered and quote is not found we append the argument to the array
