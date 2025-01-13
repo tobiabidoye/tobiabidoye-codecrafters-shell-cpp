@@ -273,11 +273,12 @@ std::vector<std::string> parseInput(const std::string & input){
                 if(inDoubleQuote && (nextChar == '\\' || nextChar == '$' || nextChar == '"')){
                     currentArg += nextChar;
                     ++i;
-                }else if(!inSingleQuote){
+
+                }else{
+                    currentArg += '\\';
                     currentArg += nextChar; 
                     ++i;
-                }else{
-                    currentArg += c;
+
                 }
             }else{
                 currentArg += c;
