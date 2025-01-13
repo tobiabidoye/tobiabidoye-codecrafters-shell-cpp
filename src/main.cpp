@@ -54,14 +54,25 @@ int main() {
       std::string currentArg; 
 
       bool inSingleQuote = false; 
-
-      for(size_t i = 0; i < input.size(); i++){
+      bool inDoubleQuote = false;
+      for(size_t i = 0; i < input.size(); ++i){
         char c = input[i];
 
-        if(c == '\''){
+        if(c == '\'' && !inDoubleQuote){
             //if quote is found we make it true
            inSingleQuote = !inSingleQuote; 
-        }else if(std::isspace(c) && !inSingleQuote){
+        }else if(c == '=' && !inSingleQuote){
+            inDoubleQuote = !inDoubleQuote; 
+            
+        }else if(c == '\\' && inDoubleQuote && i+1 < input.size()){
+            char nextChar = input[i+1]; 
+            if(nextChar == '\\' || nextChar == '$' || nextChar == '"' || nextChar == '\n'){
+                currentArg += nextChar; 
+                ++i;
+            }else{
+                currentArg += c; 
+            }
+        }else if(std::isspace(c) && !inSingleQuote &&!inDoubleQuote){
             //if space is encountered and quote is not found we append the argument to the array
             if(!currentArg.empty()){
                 args.push_back(currentArg);
@@ -79,11 +90,16 @@ int main() {
       if(!currentArg.empty()){
         args.push_back(currentArg);
       }
-     
+        
+      if(inSingleQuote || inDoubleQuote){
+        std::cerr << "unmatched quote in input" << std::endl;
+      }
+      
+
       if(args.empty()){
         continue;
       }
-
+        
 
       if(input == "exit 0"){
         isValid = true;
