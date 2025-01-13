@@ -274,11 +274,11 @@ std::vector<std::string> parseInput(const std::string & input){
                     currentArg += nextChar;
                     ++i;
 
-                }else{
-                    currentArg += '\\';
+                }else if(!inSingleQuote){
                     currentArg += nextChar; 
                     ++i;
-
+                }else{
+                    currentArg += c;
                 }
             }else{
                 currentArg += c;
