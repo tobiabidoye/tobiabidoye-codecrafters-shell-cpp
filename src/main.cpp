@@ -289,6 +289,14 @@ std::vector<std::string> parseInput(const std::string & input){
                             currentArg += ' ';
                             break;
 
+                        case '\'': 
+                            currentArg += '\''; 
+                            break; 
+
+                        case '"': 
+                            currentArg += '"'; 
+                            break;
+
                         default:
                             currentArg += '\\';
                             currentArg += nextChar; 
