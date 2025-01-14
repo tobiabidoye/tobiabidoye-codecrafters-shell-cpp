@@ -248,90 +248,125 @@ void handleCat(std::vector <std::string> &args){
 
 }
 
+std::vector<std::string> parseInput(const std::string& input) {
+    std::vector<std::string> args;
+    std::string currentArg;
 
-std::vector<std::string> parseInput(const std::string & input){
+    bool inSingleQuote = false;
+    bool inDoubleQuote = false;
 
-
-      std::istringstream iss(input);
-      std::vector <std::string> args; 
-      std::string currentArg; 
-
-      bool inSingleQuote = false; 
-      bool inDoubleQuote = false;
-      for(size_t i = 0; i < input.size(); ++i){
+    for (size_t i = 0; i < input.size(); ++i) {
         char c = input[i];
 
-        if(c == '\'' && !inDoubleQuote){
-            //if quote is found we make it true
-           inSingleQuote = !inSingleQuote; 
-        }else if(c == '"' && !inSingleQuote){
-            inDoubleQuote = !inDoubleQuote; 
-            
-        }else if(c == '\\'){
-            if(i + 1 < input.size()){
-                char nextChar = input[i+1]; 
-                if(inDoubleQuote && (nextChar == '\\' || nextChar == '$' || nextChar == '"')){
-                    currentArg += nextChar;
-                    ++i;
-
-                }else if(!inSingleQuote){
-                    switch(nextChar){
-                        case 'n': 
-                            currentArg += 'n'; 
-                            break; 
-                        case 't': 
-                            currentArg += '\t'; 
-                            break; 
-                        case '\\': 
-                            currentArg += '\\'; 
-                            break;
-                        case ' ': 
-                            currentArg += ' ';
-                            break;
-
-                        case '\'': 
-                            currentArg += '\''; 
-                            break; 
-
-                        case '"': 
-                            currentArg += '"'; 
-                            break;
-
-                        default:
-                            currentArg += '\\';
-                            currentArg += nextChar; 
-                            break;
-
-                        }
-                        ++i;
-                }else{
-                    currentArg += c;
-                }
-            }else{
+        // If we're currently inside single quotes
+        if (inSingleQuote) {
+            if (c == '\'') {
+                // End single-quote section
+                inSingleQuote = false;
+            } else {
+                // Everything inside single quotes is literal
                 currentArg += c;
             }
-        }else if(std::isspace(c) && !inSingleQuote &&!inDoubleQuote){
-            //if space is encountered and quote is not found we append the argument to the array
-            if(!currentArg.empty()){
-                args.push_back(currentArg);
-                currentArg.clear();
-            }
-
-        }else{
-            //argument takes in 
-            currentArg += c;
-
         }
+        // If we're currently inside double quotes
+        else if (inDoubleQuote) {
+            if (c == '"') {
+                // End double-quote section
+                inDoubleQuote = false;
+            }
+            else if (c == '\\' && (i + 1 < input.size())) {
+                // A backslash inside double quotes
+                char nextChar = input[i + 1];
+                // In most shells, only these are escaped: \\, \", \$
+                if (nextChar == '\\' || nextChar == '"' || nextChar == '$') {
+                    currentArg += nextChar;
+                    i++; // Skip the nextChar because we've used it
+                } else {
+                    // Any other backslash escapes are taken literally
+                    currentArg += '\\';
+                    currentArg += nextChar;
+                    i++;
+                }
+            }
+            else {
+                // Normal character in double quotes
+                currentArg += c;
+            }
+        }
+        // If we're outside of any quotes
+        else {
+            if (c == '\'') {
+                // Start single quotes
+                inSingleQuote = true;
+            }
+            else if (c == '"') {
+                // Start double quotes
+                inDoubleQuote = true;
+            }
+            else if (c == '\\') {
+                // Handle backslash escapes outside quotes
+                if (i + 1 < input.size()) {
+                    char nextChar = input[i + 1];
+                    switch (nextChar) {
+                        // Turn \n -> 'n'
+                        case 'n':
+                            currentArg += 'n';
+                            break;
+                        // Turn \t -> TAB
+                        case 't':
+                            currentArg += '\t';
+                            break;
+                        // Turn \\ -> '\'
+                        case '\\':
+                            currentArg += '\\';
+                            break;
+                        // Turn \  -> ' '
+                        case ' ':
+                            currentArg += ' ';
+                            break;
+                        // Turn \' -> '''
+                        case '\'':
+                            currentArg += '\'';
+                            break;
+                        // Turn \" -> '"'
+                        case '"':
+                            currentArg += '"';
+                            break;
+                        default:
+                            // For everything else, keep backslash + char
+                            currentArg += '\\';
+                            currentArg += nextChar;
+                            break;
+                    }
+                    i++; // Skip the nextChar
+                } else {
+                    // A lone backslash at end of string
+                    currentArg += '\\';
+                }
+            }
+            else if (std::isspace(static_cast<unsigned char>(c))) {
+                // A space outside quotes ends the current argument
+                if (!currentArg.empty()) {
+                    args.push_back(currentArg);
+                    currentArg.clear();
+                }
+            }
+            else {
+                // Normal character outside quotes
+                currentArg += c;
+            }
+        }
+    }
 
-      }
-
-      if(!currentArg.empty()){
+    // If there's something left in currentArg, push it
+    if (!currentArg.empty()) {
         args.push_back(currentArg);
-      }
-        
-      if(inSingleQuote || inDoubleQuote){
+    }
+
+    // If we ended still inside a quote, you can warn or handle it
+    if (inSingleQuote || inDoubleQuote) {
         std::cerr << "unmatched quote in input" << std::endl;
-      }
-      
+    }
+
     return args;
 }
