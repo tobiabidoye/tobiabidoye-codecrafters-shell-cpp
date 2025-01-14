@@ -275,8 +275,27 @@ std::vector<std::string> parseInput(const std::string & input){
                     ++i;
 
                 }else if(!inSingleQuote){
-                    currentArg += nextChar; 
-                    ++i;
+                    switch(nextChar){
+                        case 'n': 
+                            currentArg += '\n'; 
+                            break; 
+                        case 't': 
+                            currentArg += '\t'; 
+                            break; 
+                        case '\\': 
+                            currentArg += '\\'; 
+                            break;
+                        case ' ': 
+                            currentArg += ' ';
+                            break;
+
+                        default:
+                            currentArg += '\\';
+                            currentArg += nextChar; 
+                            break;
+
+                        }
+                        ++i;
                 }else{
                     currentArg += c;
                 }
