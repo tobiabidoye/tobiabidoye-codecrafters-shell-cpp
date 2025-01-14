@@ -276,8 +276,8 @@ std::vector<std::string> parseInput(const std::string & input){
 
                 }else if(!inSingleQuote){
                     switch(nextChar){
-                        case 'n': 
-                            currentArg += '\n'; 
+                        case '\n': 
+                            currentArg += 'n'; 
                             break; 
                         case 't': 
                             currentArg += '\t'; 
